@@ -1,0 +1,54 @@
+import Link from "next/link";
+import { businesses, products } from "@/data/businesses";
+
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default async function BusinessPage({ params }: PageProps) {
+  const { id } = await params;
+  const businessId = parseInt(id);
+
+  const business = businesses.find((b) => b.id === businessId);
+
+  if (!business) {
+    return (
+      <main className="p-8">
+        <p>Business not found</p>
+        <Link href="/" className="text-blue-600 hover:underline">
+          Back to home
+        </Link>
+      </main>
+    );
+  }
+
+  const businessProducts = products.filter((p) => p.businessId === businessId);
+
+  return (
+    <main className="p-8">
+      <Link href="/" className="text-blue-600 hover:underline mb-4 block">
+        ← Back to businesses
+      </Link>
+
+      <h1 className="text-3xl font-bold">{business.name}</h1>
+      <p className="text-gray-500">{business.category}</p>
+      <p className="mt-2 text-gray-700">{business.address}</p>
+
+      <div className="mt-8">
+        <h2 className="text-2xl font-semibold mb-4">Products</h2>
+        <div className="grid gap-3">
+          {businessProducts.map((product) => (
+            <div key={product.id} className="border rounded-lg p-4">
+              <div className="flex justify-between items-center">
+                <h3 className="font-semibold">{product.name}</h3>
+                <span className="text-green-600 font-semibold">
+                  ${product.price.toFixed(2)}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </main>
+  );
+}
