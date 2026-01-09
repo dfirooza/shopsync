@@ -10,13 +10,13 @@ export default async function BusinessPage({ params }: PageProps) {
   const supabase = await createClient();
 
   // Fetch business by ID
-  const { data: business, error: businessError } = await supabase
+  const { data: business } = await supabase
     .from("businesses")
     .select("*")
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
-  if (businessError || !business) {
+  if (!business) {
     return (
       <main className="p-8">
         <p>Business not found</p>
