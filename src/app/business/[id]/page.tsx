@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
 type Business = Tables<"businesses">;
+type Product = Tables<"products">;
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -33,11 +34,13 @@ export default async function BusinessPage({ params }: PageProps) {
   }
 
   // Fetch products for this business
-  const { data: businessProducts } = await supabase
+  const { data: productsData } = await supabase
     .from("products")
     .select("*")
     .eq("business_id", id)
     .order("name");
+
+  const businessProducts = (productsData as Product[]) || [];
 
   return (
     <main className="p-8">
@@ -52,7 +55,7 @@ export default async function BusinessPage({ params }: PageProps) {
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4">Products</h2>
         <div className="grid gap-3">
-          {businessProducts?.map((product) => (
+          {businessProducts.map((product) => (
             <div key={product.id} className="border rounded-lg p-4">
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold">{product.name}</h3>
