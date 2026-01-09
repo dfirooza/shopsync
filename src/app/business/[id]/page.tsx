@@ -14,13 +14,15 @@ export default async function BusinessPage({ params }: PageProps) {
   const supabase = await createClient();
 
   // Fetch business by ID
-  const { data: business, error: businessError } = await supabase
+  const businessResult = await supabase
     .from("businesses")
     .select("*")
     .eq("id", id)
-    .maybeSingle<Business>();
+    .maybeSingle();
 
-  if (businessError || !business) {
+  const business = businessResult.data as Business | null;
+
+  if (businessResult.error || !business) {
     return (
       <main className="p-8">
         <p>Business not found</p>
@@ -32,11 +34,13 @@ export default async function BusinessPage({ params }: PageProps) {
   }
 
   // Fetch products for this business
-  const { data: businessProducts } = await supabase
+  const productsResult = await supabase
     .from("products")
     .select("*")
     .eq("business_id", id)
-    .order("name") as { data: Product[] | null };
+    .order("name");
+
+  const businessProducts = (productsResult.data as Product[] | null) ?? [];
 
   return (
     <main className="p-8">
@@ -51,7 +55,7 @@ export default async function BusinessPage({ params }: PageProps) {
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4">Products</h2>
         <div className="grid gap-3">
-          {businessProducts?.map((product) => (
+          {businessProducts.map((product) => (
             <div key={product.id} className="border rounded-lg p-4">
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold">{product.name}</h3>
