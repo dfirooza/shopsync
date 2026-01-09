@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { businesses, products } from "@/data/businesses";
+import { createClient } from "@/lib/supabase/server";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -7,11 +7,16 @@ interface PageProps {
 
 export default async function BusinessPage({ params }: PageProps) {
   const { id } = await params;
-  const businessId = parseInt(id);
+  const supabase = await createClient();
 
-  const business = businesses.find((b) => b.id === businessId);
+  // Fetch business by ID
+  const { data: business, error: businessError } = await supabase
+    .from("businesses")
+    .select("*")
+    .eq("id", id)
+    .single();
 
-  if (!business) {
+  if (businessError || !business) {
     return (
       <main className="p-8">
         <p>Business not found</p>
@@ -22,7 +27,16 @@ export default async function BusinessPage({ params }: PageProps) {
     );
   }
 
-  const businessProducts = products.filter((p) => p.businessId === businessId);
+  // Fetch products for this business
+  const { data: businessProducts, error: productsError } = await supabase
+    .from("products")
+    .select("*")
+    .eq("business_id", id)
+    .order("name");
+
+  if (productsError) {
+    console.error("Error fetching products:", productsError);
+  }
 
   return (
     <main className="p-8">
@@ -37,7 +51,7 @@ export default async function BusinessPage({ params }: PageProps) {
       <div className="mt-8">
         <h2 className="text-2xl font-semibold mb-4">Products</h2>
         <div className="grid gap-3">
-          {businessProducts.map((product) => (
+          {businessProducts?.map((product) => (
             <div key={product.id} className="border rounded-lg p-4">
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold">{product.name}</h3>

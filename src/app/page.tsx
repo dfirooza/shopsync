@@ -1,16 +1,68 @@
 import Link from "next/link";
-import { businesses } from "@/data/businesses";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+
+  // Check if user is logged in
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // Fetch businesses from Supabase
+  const { data: businesses, error } = await supabase
+    .from("businesses")
+    .select("*")
+    .order("name");
+
+  if (error) {
+    console.error("Error fetching businesses:", error);
+    return (
+      <main className="p-8">
+        <h1 className="text-2xl font-bold">ShopSync</h1>
+        <p className="mt-4 text-red-600">Failed to load businesses</p>
+      </main>
+    );
+  }
+
   return (
     <main className="p-8">
-      <h1 className="text-2xl font-bold">ShopSync</h1>
-      <p className="mt-2 text-gray-600">
-        Discover and support local Berkeley businesses.
-      </p>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">ShopSync</h1>
+          <p className="mt-2 text-gray-600">
+            Discover and support local Berkeley businesses.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          {user ? (
+            <Link
+              href="/owner"
+              className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/signup"
+                className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
+              >
+                Sign Up
+              </Link>
+              <Link
+                href="/login"
+                className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+              >
+                Login
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
 
       <div className="mt-8 grid gap-4">
-        {businesses.map((business) => (
+        {businesses?.map((business) => (
           <Link
             key={business.id}
             href={`/business/${business.id}`}

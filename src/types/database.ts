@@ -15,6 +15,7 @@ export type Database = {
           name: string
           category: string
           address: string
+          owner_id: string | null
           created_at: string
         }
         Insert: {
@@ -22,6 +23,7 @@ export type Database = {
           name: string
           category: string
           address: string
+          owner_id?: string | null
           created_at?: string
         }
         Update: {
@@ -29,7 +31,66 @@ export type Database = {
           name?: string
           category?: string
           address?: string
+          owner_id?: string | null
           created_at?: string
+        }
+      }
+      profiles: {
+        Row: {
+          id: string
+          role: 'user' | 'business'
+          business_approved: boolean
+          email: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          role?: 'user' | 'business'
+          business_approved?: boolean
+          email?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          role?: 'user' | 'business'
+          business_approved?: boolean
+          email?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      business_requests: {
+        Row: {
+          id: string
+          user_id: string
+          business_name: string
+          business_category: string
+          business_address: string
+          status: 'pending' | 'approved' | 'rejected'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          business_name: string
+          business_category: string
+          business_address: string
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          business_name?: string
+          business_category?: string
+          business_address?: string
+          status?: 'pending' | 'approved' | 'rejected'
+          created_at?: string
+          updated_at?: string
         }
       }
       products: {
@@ -38,6 +99,7 @@ export type Database = {
           business_id: string
           name: string
           price: number
+          description: string | null
           created_at: string
         }
         Insert: {
@@ -45,6 +107,7 @@ export type Database = {
           business_id: string
           name: string
           price: number
+          description?: string | null
           created_at?: string
         }
         Update: {
@@ -52,6 +115,7 @@ export type Database = {
           business_id?: string
           name?: string
           price?: number
+          description?: string | null
           created_at?: string
         }
       }
