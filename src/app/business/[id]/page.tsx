@@ -13,13 +13,15 @@ export default async function BusinessPage({ params }: PageProps) {
   const supabase = await createClient();
 
   // Fetch business by ID
-  const { data: businessData } = await supabase
+  const { data } = await supabase
     .from("businesses")
     .select("*")
     .eq("id", id)
     .maybeSingle();
 
-  if (!businessData) {
+  const business = data as Business | null;
+
+  if (!business) {
     return (
       <main className="p-8">
         <p>Business not found</p>
@@ -29,8 +31,6 @@ export default async function BusinessPage({ params }: PageProps) {
       </main>
     );
   }
-
-  const business: Business = businessData;
 
   // Fetch products for this business
   const { data: businessProducts } = await supabase
