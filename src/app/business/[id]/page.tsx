@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import type { Tables } from "@/types/database";
+
+type Business = Tables<"businesses">;
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -10,13 +13,13 @@ export default async function BusinessPage({ params }: PageProps) {
   const supabase = await createClient();
 
   // Fetch business by ID
-  const { data: business } = await supabase
+  const { data: businessData } = await supabase
     .from("businesses")
     .select("*")
     .eq("id", id)
     .maybeSingle();
 
-  if (!business) {
+  if (!businessData) {
     return (
       <main className="p-8">
         <p>Business not found</p>
@@ -27,16 +30,14 @@ export default async function BusinessPage({ params }: PageProps) {
     );
   }
 
+  const business: Business = businessData;
+
   // Fetch products for this business
-  const { data: businessProducts, error: productsError } = await supabase
+  const { data: businessProducts } = await supabase
     .from("products")
     .select("*")
     .eq("business_id", id)
     .order("name");
-
-  if (productsError) {
-    console.error("Error fetching products:", productsError);
-  }
 
   return (
     <main className="p-8">
