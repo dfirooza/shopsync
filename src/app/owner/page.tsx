@@ -5,6 +5,7 @@ import LogoutButton from "./LogoutButton";
 import BusinessRequestForm from "./BusinessRequestForm";
 import BusinessForm from "./BusinessForm";
 import ProductsManager from "./ProductsManager";
+import type { Tables } from "@/types/database";
 
 export default async function OwnerDashboard() {
   const supabase = await createClient();
@@ -18,39 +19,47 @@ export default async function OwnerDashboard() {
   }
 
   // Fetch user profile
-  const { data: profile } = await supabase
+  const profileResult = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
 
+  const profile = profileResult.data as Tables<"profiles"> | null;
+
   // Check if user has pending business request
-  const { data: existingRequest } = await supabase
+  const requestResult = await supabase
     .from("business_requests")
     .select("*")
     .eq("user_id", user.id)
     .eq("status", "pending")
     .maybeSingle();
 
+  const existingRequest = requestResult.data as Tables<"business_requests"> | null;
+
   // Check if user is approved business user
   const isApprovedBusiness =
     profile?.role === "business" && profile?.business_approved === true;
 
   // Fetch user's business if they have one
-  const { data: business } = await supabase
+  const businessResult = await supabase
     .from("businesses")
     .select("*")
     .eq("owner_id", user.id)
     .maybeSingle();
 
+  const business = businessResult.data as Tables<"businesses"> | null;
+
   // Fetch products if business exists
-  const { data: products } = business
+  const productsResult = business
     ? await supabase
         .from("products")
         .select("*")
         .eq("business_id", business.id)
         .order("created_at", { ascending: false })
-    : { data: null };
+    : null;
+
+  const products = (productsResult?.data as Tables<"products">[] | null) ?? null;
 
   return (
     <main className="p-8">

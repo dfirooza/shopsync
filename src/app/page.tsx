@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import type { Tables } from "@/types/database";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -10,10 +11,13 @@ export default async function Home() {
   } = await supabase.auth.getUser();
 
   // Fetch businesses from Supabase
-  const { data: businesses, error } = await supabase
+  const businessesResult = await supabase
     .from("businesses")
     .select("*")
     .order("name");
+
+  const businesses = businessesResult.data as Tables<"businesses">[] | null;
+  const error = businessesResult.error;
 
   if (error) {
     console.error("Error fetching businesses:", error);

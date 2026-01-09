@@ -31,6 +31,7 @@ export default function BusinessRequestForm() {
     // Submit business request
     const { error: insertError } = await supabase
       .from("business_requests")
+      // @ts-expect-error - Supabase type inference issue
       .insert({
         user_id: user.id,
         business_name: businessName,
