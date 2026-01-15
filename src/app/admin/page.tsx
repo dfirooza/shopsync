@@ -50,7 +50,7 @@ export default async function AdminPage() {
   }
 
   // Fetch all business requests, ordered by status (pending first) and created_at (newest first)
-  const { data: requests, error } = await supabase
+  const { data: requestsData, error } = await supabase
     .from('business_requests')
     .select(`
       id,
@@ -82,6 +82,12 @@ export default async function AdminPage() {
     );
   }
 
+  type RequestWithProfile = Pick<Tables<'business_requests'>, 'id' | 'user_id' | 'business_name' | 'business_category' | 'business_address' | 'status' | 'created_at'> & {
+    profiles: { email: string } | null;
+  };
+
+  const requests = requestsData as RequestWithProfile[] | null;
+
   // Transform data to include email
   const requestsWithEmail = requests?.map((req) => ({
     id: req.id,
@@ -91,7 +97,7 @@ export default async function AdminPage() {
     business_address: req.business_address,
     status: req.status,
     created_at: req.created_at,
-    email: (req.profiles as any)?.email,
+    email: req.profiles?.email,
   })) || [];
 
   // Separate pending and non-pending requests
