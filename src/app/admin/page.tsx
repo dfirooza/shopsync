@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import RequestRow from "./RequestRow";
+import type { Tables } from "@/types/database";
 
 export default async function AdminPage() {
   const supabase = await createClient();
@@ -22,12 +23,14 @@ export default async function AdminPage() {
     .eq('id', user.id)
     .single();
 
+  const userProfile = profile as Pick<Tables<'profiles'>, 'role' | 'email'> | null;
+
   // Debug logging
   console.log('User ID:', user.id);
-  console.log('Profile data:', profile);
+  console.log('Profile data:', userProfile);
   console.log('Profile error:', profileError);
 
-  if (!profile || profile.role !== 'admin') {
+  if (!userProfile || userProfile.role !== 'admin') {
     return (
       <main className="p-8">
         <div className="max-w-2xl mx-auto">
@@ -36,7 +39,7 @@ export default async function AdminPage() {
             You do not have permission to access this page.
           </p>
           <p className="mt-2 text-sm text-gray-600">
-            Debug: Profile role = {profile?.role || 'null'}, Error = {profileError?.message || 'none'}
+            Debug: Profile role = {userProfile?.role || 'null'}, Error = {profileError?.message || 'none'}
           </p>
           <Link href="/" className="mt-4 inline-block text-blue-600 hover:underline">
             ← Back to home
