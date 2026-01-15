@@ -20,6 +20,19 @@ export default async function Home({ searchParams }: HomeProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Check if user is admin
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const userProfile = profile as Pick<Tables<'profiles'>, 'role'> | null;
+    isAdmin = userProfile?.role === 'admin';
+  }
+
   // Build Supabase query with filters
   let businessQuery = supabase.from("businesses").select("*");
 
@@ -86,12 +99,22 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
             <div className="flex gap-3">
               {user ? (
-                <Link
-                  href="/owner"
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-6 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
-                >
-                  Dashboard
-                </Link>
+                <>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 px-6 rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
+                    >
+                      Admin
+                    </Link>
+                  )}
+                  <Link
+                    href="/owner"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2 px-6 rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium"
+                  >
+                    Dashboard
+                  </Link>
+                </>
               ) : (
                 <>
                   <Link
