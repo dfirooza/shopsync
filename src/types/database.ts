@@ -38,7 +38,7 @@ export type Database = {
       profiles: {
         Row: {
           id: string
-          role: 'user' | 'business'
+          role: 'user' | 'business' | 'admin'
           business_approved: boolean
           email: string | null
           created_at: string
@@ -46,7 +46,7 @@ export type Database = {
         }
         Insert: {
           id: string
-          role?: 'user' | 'business'
+          role?: 'user' | 'business' | 'admin'
           business_approved?: boolean
           email?: string | null
           created_at?: string
@@ -54,7 +54,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          role?: 'user' | 'business'
+          role?: 'user' | 'business' | 'admin'
           business_approved?: boolean
           email?: string | null
           created_at?: string
@@ -100,6 +100,7 @@ export type Database = {
           name: string
           price: number
           description: string | null
+          image_url: string | null
           created_at: string
         }
         Insert: {
@@ -108,6 +109,7 @@ export type Database = {
           name: string
           price: number
           description?: string | null
+          image_url?: string | null
           created_at?: string
         }
         Update: {
@@ -116,6 +118,7 @@ export type Database = {
           name?: string
           price?: number
           description?: string | null
+          image_url?: string | null
           created_at?: string
         }
       }

@@ -95,6 +95,23 @@ function ProductForm({ businessId, product, onCancel }: ProductFormProps) {
           />
         </div>
 
+        <div>
+          <label htmlFor={`image-${product?.id || 'new'}`} className="block text-sm font-medium mb-2 text-gray-900">
+            Product Image (Optional)
+          </label>
+          <input
+            id={`image-${product?.id || 'new'}`}
+            name="image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/jpg"
+            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 bg-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+          />
+          <p className="text-xs text-gray-500 mt-1">Max 5MB. Formats: JPG, PNG, WebP</p>
+          {product?.image_url && (
+            <p className="text-xs text-green-600 mt-1">Current image will be replaced if you select a new one</p>
+          )}
+        </div>
+
         {state?.error && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-red-600 text-sm">{state.error}</p>
@@ -186,29 +203,40 @@ export default function ProductsManager({
                 />
               ) : (
                 <div className="border rounded-lg p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold">{product.name}</h3>
-                      <p className="text-xl text-green-600 font-bold mt-1">
-                        ${product.price.toFixed(2)}
-                      </p>
-                      {product.description && (
-                        <p className="text-gray-600 mt-2">{product.description}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => setEditingProductId(product.id)}
-                        className="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700 text-sm"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 text-sm"
-                      >
-                        Delete
-                      </button>
+                  <div className="flex gap-4">
+                    {product.image_url && (
+                      <div className="flex-shrink-0">
+                        <img
+                          src={product.image_url}
+                          alt={product.name}
+                          className="w-24 h-24 object-cover rounded-lg"
+                        />
+                      </div>
+                    )}
+                    <div className="flex-1 flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-semibold">{product.name}</h3>
+                        <p className="text-xl text-green-600 font-bold mt-1">
+                          ${product.price.toFixed(2)}
+                        </p>
+                        {product.description && (
+                          <p className="text-gray-600 mt-2">{product.description}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setEditingProductId(product.id)}
+                          className="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(product.id)}
+                          className="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
