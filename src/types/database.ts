@@ -9,6 +9,35 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      events: {
+        Row: {
+          id: string
+          event_type: string
+          business_id: string | null
+          product_id: string | null
+          actor_id: string | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_type: string
+          business_id?: string | null
+          product_id?: string | null
+          actor_id?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_type?: string
+          business_id?: string | null
+          product_id?: string | null
+          actor_id?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
       businesses: {
         Row: {
           id: string
