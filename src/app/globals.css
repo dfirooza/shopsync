@@ -1,8 +1,51 @@
 @import "tailwindcss";
 
 :root {
+  /* Salesforce Color Palette */
+  --sf-blue-primary: #0176d3;
+  --sf-blue-dark: #014486;
+  --sf-blue-light: #1589ee;
+  --sf-blue-lighter: #eff3f7;
+  --sf-blue-pale: #f3f8fd;
+
+  /* Purple accent (like SF industries page) */
+  --sf-purple: #7f56d9;
+  --sf-purple-light: #9e77ed;
+  --sf-purple-dark: #6941c6;
+  --sf-purple-pale: #f4f3ff;
+
+  --sf-gray-1: #181818;
+  --sf-gray-2: #3e3e3c;
+  --sf-gray-3: #706e6b;
+  --sf-gray-4: #c9c7c5;
+  --sf-gray-5: #e5e5e5;
+  --sf-gray-6: #f3f3f3;
+  --sf-gray-7: #fafaf9;
+
+  --sf-success: #2e844a;
+  --sf-success-light: #e3f4e8;
+  --sf-warning: #fe9339;
+  --sf-warning-light: #fef3e7;
+  --sf-error: #ea001e;
+  --sf-error-light: #feded8;
+  --sf-info: #0176d3;
+  --sf-info-light: #d8edff;
+
+  /* Semantic tokens */
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #181818;
+  --border: #c9c7c5;
+  --border-light: #e5e5e5;
+  --muted: #706e6b;
+  --accent: #0176d3;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 8px 24px 0 rgba(0, 0, 0, 0.12);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 @theme inline {
@@ -10,17 +53,144 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Salesforce Blue Palette */
+  --color-sf-blue-*: initial;
+  --color-sf-blue-primary: var(--sf-blue-primary);
+  --color-sf-blue-dark: var(--sf-blue-dark);
+  --color-sf-blue-light: var(--sf-blue-light);
+  --color-sf-blue-lighter: var(--sf-blue-lighter);
+  --color-sf-blue-pale: var(--sf-blue-pale);
+
+  /* Salesforce Purple Palette */
+  --color-sf-purple-*: initial;
+  --color-sf-purple: var(--sf-purple);
+  --color-sf-purple-light: var(--sf-purple-light);
+  --color-sf-purple-dark: var(--sf-purple-dark);
+  --color-sf-purple-pale: var(--sf-purple-pale);
+
+  /* Salesforce Gray Palette */
+  --color-sf-gray-*: initial;
+  --color-sf-gray-1: var(--sf-gray-1);
+  --color-sf-gray-2: var(--sf-gray-2);
+  --color-sf-gray-3: var(--sf-gray-3);
+  --color-sf-gray-4: var(--sf-gray-4);
+  --color-sf-gray-5: var(--sf-gray-5);
+  --color-sf-gray-6: var(--sf-gray-6);
+  --color-sf-gray-7: var(--sf-gray-7);
+
+  /* Status Colors */
+  --color-sf-success: var(--sf-success);
+  --color-sf-success-light: var(--sf-success-light);
+  --color-sf-warning: var(--sf-warning);
+  --color-sf-warning-light: var(--sf-warning-light);
+  --color-sf-error: var(--sf-error);
+  --color-sf-error-light: var(--sf-error-light);
+  --color-sf-info: var(--sf-info);
+  --color-sf-info-light: var(--sf-info-light);
+
+  /* Semantic Colors */
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+
+  /* Shadows */
+  --shadow-*: initial;
+  --shadow-sf-sm: var(--shadow-sm);
+  --shadow-sf-md: var(--shadow-md);
+  --shadow-sf-lg: var(--shadow-lg);
+  --shadow-sf-xl: var(--shadow-xl);
+  --shadow-sf-card: var(--shadow-card);
+  --shadow-sf-card-hover: var(--shadow-card-hover);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
-    --foreground: #ededed;
+    --foreground: #fafaf9;
+    --border: #3e3e3c;
+    --border-light: #706e6b;
+    --muted: #c9c7c5;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Salesforce-style card with wave decoration */
+.sf-card {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.sf-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.sf-card-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(135deg, var(--sf-purple-light) 0%, var(--sf-purple) 100%);
+  clip-path: ellipse(70% 60% at 80% 100%);
+}
+
+.sf-card-icon {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.sf-card-icon svg {
+  width: 24px;
+  height: 24px;
+  color: var(--sf-purple);
+}
+
+/* Button styles */
+.sf-btn-primary {
+  background: var(--sf-blue-primary);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.sf-btn-primary:hover {
+  background: var(--sf-blue-dark);
+}
+
+.sf-link {
+  color: var(--sf-blue-primary);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+
+.sf-link:hover {
+  color: var(--sf-blue-dark);
 }

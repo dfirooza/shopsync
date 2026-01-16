@@ -31,25 +31,25 @@ export default function BusinessFilters({ categories }: BusinessFiltersProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="bg-white rounded-xl shadow-sf-card p-6">
+      <div className="flex flex-col md:flex-row gap-4 items-end">
         {/* Search Input */}
-        <div>
-          <label htmlFor="search" className="block text-sm font-semibold mb-2 text-gray-700">
+        <div className="flex-1 w-full">
+          <label htmlFor="search" className="block text-sm font-medium mb-2 text-sf-gray-2">
             Search
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
               <svg
-                className="h-5 w-5 text-gray-400"
+                className="h-5 w-5 text-sf-gray-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                strokeWidth={1.5}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
@@ -57,40 +57,25 @@ export default function BusinessFilters({ categories }: BusinessFiltersProps) {
             <input
               id="search"
               type="text"
-              placeholder="Search businesses..."
+              placeholder="Ask Agentforce anything"
               defaultValue={currentQuery}
               onChange={(e) => updateFilters("q", e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white transition-all"
+              className="w-full pl-12 pr-4 py-3 text-sm border border-sf-gray-5 rounded-full focus:outline-none focus:ring-2 focus:ring-sf-blue-light focus:border-sf-blue-primary text-sf-gray-1 bg-sf-gray-7 transition-all placeholder:text-sf-gray-4"
             />
           </div>
         </div>
 
         {/* Category Filter */}
-        <div>
-          <label htmlFor="category" className="block text-sm font-semibold mb-2 text-gray-700">
+        <div className="w-full md:w-48">
+          <label htmlFor="category" className="block text-sm font-medium mb-2 text-sf-gray-2">
             Category
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                />
-              </svg>
-            </div>
             <select
               id="category"
               value={currentCategory}
               onChange={(e) => updateFilters("category", e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white appearance-none transition-all cursor-pointer"
+              className="w-full px-4 py-3 text-sm border border-sf-gray-5 rounded-lg focus:outline-none focus:ring-2 focus:ring-sf-blue-light focus:border-sf-blue-primary text-sf-gray-1 bg-white appearance-none transition-all cursor-pointer"
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
@@ -101,15 +86,15 @@ export default function BusinessFilters({ categories }: BusinessFiltersProps) {
             </select>
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <svg
-                className="h-5 w-5 text-gray-400"
+                className="h-4 w-4 text-sf-gray-3"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                strokeWidth={2}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M19 9l-7 7-7-7"
                 />
               </svg>
@@ -118,47 +103,32 @@ export default function BusinessFilters({ categories }: BusinessFiltersProps) {
         </div>
 
         {/* Sort Dropdown */}
-        <div>
-          <label htmlFor="sort" className="block text-sm font-semibold mb-2 text-gray-700">
+        <div className="w-full md:w-40">
+          <label htmlFor="sort" className="block text-sm font-medium mb-2 text-sf-gray-2">
             Sort By
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
-                />
-              </svg>
-            </div>
             <select
               id="sort"
               value={currentSort}
               onChange={(e) => updateFilters("sort", e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white appearance-none transition-all cursor-pointer"
+              className="w-full px-4 py-3 text-sm border border-sf-gray-5 rounded-lg focus:outline-none focus:ring-2 focus:ring-sf-blue-light focus:border-sf-blue-primary text-sf-gray-1 bg-white appearance-none transition-all cursor-pointer"
             >
-              <option value="name-asc">A → Z</option>
-              <option value="name-desc">Z → A</option>
-              <option value="newest">Newest First</option>
+              <option value="name-asc">Name A-Z</option>
+              <option value="name-desc">Name Z-A</option>
+              <option value="newest">Newest</option>
             </select>
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
               <svg
-                className="h-5 w-5 text-gray-400"
+                className="h-4 w-4 text-sf-gray-3"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                strokeWidth={2}
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  strokeWidth={2}
                   d="M19 9l-7 7-7-7"
                 />
               </svg>
@@ -168,7 +138,7 @@ export default function BusinessFilters({ categories }: BusinessFiltersProps) {
       </div>
 
       {isPending && (
-        <div className="mt-4 flex items-center text-sm text-blue-600">
+        <div className="mt-4 flex items-center text-sm text-sf-blue-primary">
           <svg
             className="animate-spin h-4 w-4 mr-2"
             fill="none"
