@@ -3,6 +3,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 import ProductSort from "./ProductSort";
+import MessageButton from "./MessageButton";
 
 type Business = Tables<"businesses">;
 type Product = Tables<"products">;
@@ -58,6 +59,15 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
   const productsResult = await productsQuery;
   const businessProducts = (productsResult.data as Product[] | null) ?? [];
 
+  // Check if user is logged in
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isLoggedIn = !!user;
+
+  // Check if user is the business owner (hide message button for own business)
+  const isOwnBusiness = user?.id === business.owner_id;
+
   return (
     <div className="min-h-screen bg-sf-gray-7">
       {/* Navigation Bar */}
@@ -104,6 +114,9 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
                 <span className="text-sm">{business.address}</span>
               </div>
             </div>
+            {!isOwnBusiness && (
+              <MessageButton businessId={business.id} isLoggedIn={isLoggedIn} />
+            )}
           </div>
         </div>
       </div>

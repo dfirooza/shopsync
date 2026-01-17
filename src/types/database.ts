@@ -122,6 +122,49 @@ export type Database = {
           created_at?: string
         }
       }
+      conversations: {
+        Row: {
+          id: string
+          business_id: string
+          customer_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          customer_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          business_id?: string
+          customer_id?: string
+          created_at?: string
+        }
+      }
+      messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_id: string
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_id: string
+          body: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          sender_id?: string
+          body?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
