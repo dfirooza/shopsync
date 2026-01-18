@@ -1,20 +1,60 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useTransition, useEffect, useRef } from "react";
+import { logSearch } from "@/lib/analytics";
 
 interface BusinessFiltersProps {
   categories: string[];
+  resultsBusinessIds: string[];
 }
 
-export default function BusinessFilters({ categories }: BusinessFiltersProps) {
+export default function BusinessFilters({ categories, resultsBusinessIds }: BusinessFiltersProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastLoggedSearchRef = useRef<string>("");
 
   const currentQuery = searchParams.get("q") || "";
   const currentCategory = searchParams.get("category") || "";
   const currentSort = searchParams.get("sort") || "name-asc";
+
+  // Log search events with debounce
+  useEffect(() => {
+    // Only log if there's a search query
+    if (!currentQuery.trim()) {
+      return;
+    }
+
+    // Create a unique key for this search to avoid duplicate logging
+    const searchKey = `${currentQuery}|${currentCategory}|${currentSort}`;
+    if (searchKey === lastLoggedSearchRef.current) {
+      return;
+    }
+
+    // Clear any existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Debounce: wait 1 second after user stops typing/changing filters
+    debounceTimerRef.current = setTimeout(() => {
+      logSearch(
+        currentQuery,
+        currentCategory || null,
+        currentSort,
+        resultsBusinessIds
+      );
+      lastLoggedSearchRef.current = searchKey;
+    }, 1000);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [currentQuery, currentCategory, currentSort, resultsBusinessIds]);
 
   const updateFilters = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -57,7 +97,7 @@ export default function BusinessFilters({ categories }: BusinessFiltersProps) {
             <input
               id="search"
               type="text"
-              placeholder="Ask Agentforce anything"
+              placeholder="Search businesses..."
               defaultValue={currentQuery}
               onChange={(e) => updateFilters("q", e.target.value)}
               className="w-full pl-12 pr-4 py-3 text-sm border border-sf-gray-5 rounded-full focus:outline-none focus:ring-2 focus:ring-sf-blue-light focus:border-sf-blue-primary text-sf-gray-1 bg-sf-gray-7 transition-all placeholder:text-sf-gray-4"

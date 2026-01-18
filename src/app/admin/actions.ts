@@ -70,6 +70,34 @@ export async function approveBusinessRequest(requestId: string) {
     return { error: `Failed to update profile: ${updateProfileError.message}` };
   }
 
+  // Get full request details to create the business
+  const { data: fullRequest, error: fullRequestError } = await supabase
+    .from('business_requests')
+    .select('business_name, business_category, business_address, user_id')
+    .eq('id', requestId)
+    .single();
+
+  const requestDetails = fullRequest as Pick<Tables<'business_requests'>, 'business_name' | 'business_category' | 'business_address' | 'user_id'> | null;
+
+  if (fullRequestError || !requestDetails) {
+    return { error: `Failed to get request details: ${fullRequestError?.message}` };
+  }
+
+  // Create the business in the businesses table
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: createBusinessError } = await (supabase as any)
+    .from('businesses')
+    .insert({
+      name: requestDetails.business_name,
+      category: requestDetails.business_category,
+      address: requestDetails.business_address,
+      owner_id: requestDetails.user_id,
+    });
+
+  if (createBusinessError) {
+    return { error: `Failed to create business: ${createBusinessError.message}` };
+  }
+
   revalidatePath('/admin');
   return { success: true, message: `Approved business request for "${businessRequest.business_name}"` };
 }

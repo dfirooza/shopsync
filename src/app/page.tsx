@@ -139,6 +139,9 @@ export default async function Home({ searchParams }: HomeProps) {
                 <Link href="/" className="text-sm font-medium text-sf-gray-2 hover:text-sf-blue-primary transition-colors">
                   Businesses
                 </Link>
+                <Link href="/trending" className="text-sm font-medium text-sf-gray-2 hover:text-sf-blue-primary transition-colors">
+                  Trending
+                </Link>
                 {user && (
                   <Link href="/owner" className="text-sm font-medium text-sf-gray-2 hover:text-sf-blue-primary transition-colors">
                     Dashboard
@@ -184,10 +187,10 @@ export default async function Home({ searchParams }: HomeProps) {
       <div className="bg-white border-b border-border-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="max-w-2xl">
-            <h1 className="text-4xl md:text-5xl font-bold text-sf-gray-1 mb-4 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-sf-gray-1 mb-4 leading-[1.1] tracking-tight">
               Discover Local Businesses
             </h1>
-            <p className="text-lg text-sf-gray-3">
+            <p className="text-lg text-sf-gray-2">
               Connect with amazing local businesses in your community. Support small businesses and find exactly what you need.
             </p>
           </div>
@@ -198,7 +201,10 @@ export default async function Home({ searchParams }: HomeProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Filters */}
         <div className="mb-8">
-          <BusinessFilters categories={uniqueCategories} />
+          <BusinessFilters
+            categories={uniqueCategories}
+            resultsBusinessIds={businesses?.map(b => b.id) || []}
+          />
         </div>
 
         {/* Business Grid */}

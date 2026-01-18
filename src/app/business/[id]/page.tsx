@@ -1,9 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 import ProductSort from "./ProductSort";
 import MessageButton from "./MessageButton";
+import AnalyticsTracker from "./AnalyticsTracker";
+import ProductCard from "./ProductCard";
 
 type Business = Tables<"businesses">;
 type Product = Tables<"products">;
@@ -70,6 +71,9 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
 
   return (
     <div className="min-h-screen bg-sf-gray-7">
+      {/* Analytics Tracker */}
+      <AnalyticsTracker businessId={business.id} />
+
       {/* Navigation Bar */}
       <nav className="bg-white border-b border-border-light sticky top-0 z-50 shadow-sf-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -133,36 +137,11 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
           {businessProducts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {businessProducts.map((product) => (
-                <div
+                <ProductCard
                   key={product.id}
-                  className="group bg-white border border-border-light rounded overflow-hidden hover:shadow-sf-md hover:border-sf-blue-primary transition-all duration-200"
-                >
-                  {product.image_url && (
-                    <div className="relative h-40 bg-sf-gray-6 overflow-hidden">
-                      <Image
-                        src={product.image_url}
-                        alt={product.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-base text-sf-gray-1 group-hover:text-sf-blue-primary transition-colors flex-1">
-                        {product.name}
-                      </h3>
-                      <span className="inline-flex items-center px-2.5 py-1 rounded text-sm font-semibold bg-sf-success text-white ml-2">
-                        ${product.price.toFixed(2)}
-                      </span>
-                    </div>
-                    {product.description && (
-                      <p className="text-sf-gray-3 text-sm mt-2 line-clamp-2">
-                        {product.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  product={product}
+                  businessId={business.id}
+                />
               ))}
             </div>
           ) : (
