@@ -52,18 +52,7 @@ export default async function AdminPage() {
   // Fetch all business requests, ordered by status (pending first) and created_at (newest first)
   const { data: requestsData, error } = await supabase
     .from('business_requests')
-    .select(`
-      id,
-      user_id,
-      business_name,
-      business_category,
-      business_address,
-      status,
-      created_at,
-      profiles!business_requests_user_id_fkey (
-        email
-      )
-    `)
+    .select('id, user_id, business_name, business_category, business_address, status, created_at')
     .order('status', { ascending: true }) // pending < approved < rejected (alphabetically)
     .order('created_at', { ascending: false });
 
@@ -82,11 +71,23 @@ export default async function AdminPage() {
     );
   }
 
-  type RequestWithProfile = Pick<Tables<'business_requests'>, 'id' | 'user_id' | 'business_name' | 'business_category' | 'business_address' | 'status' | 'created_at'> & {
-    profiles: { email: string } | null;
-  };
+  type RequestData = Pick<Tables<'business_requests'>, 'id' | 'user_id' | 'business_name' | 'business_category' | 'business_address' | 'status' | 'created_at'>;
 
-  const requests = requestsData as RequestWithProfile[] | null;
+  const requests = requestsData as RequestData[] | null;
+
+  // Fetch emails for all user_ids from profiles
+  const userIds = requests?.map(r => r.user_id) || [];
+  const { data: profilesData } = await supabase
+    .from('profiles')
+    .select('id, email')
+    .in('id', userIds);
+
+  const profilesMap = new Map<string, string>();
+  if (profilesData) {
+    for (const p of profilesData) {
+      if (p.email) profilesMap.set(p.id, p.email);
+    }
+  }
 
   // Transform data to include email
   const requestsWithEmail = requests?.map((req) => ({
@@ -97,7 +98,7 @@ export default async function AdminPage() {
     business_address: req.business_address,
     status: req.status,
     created_at: req.created_at,
-    email: req.profiles?.email,
+    email: profilesMap.get(req.user_id),
   })) || [];
 
   // Separate pending and non-pending requests
