@@ -77,15 +77,18 @@ export default async function AdminPage() {
 
   // Fetch emails for all user_ids from profiles
   const userIds = requests?.map(r => r.user_id) || [];
-  const { data: profilesData } = await supabase
-    .from('profiles')
-    .select('id, email')
-    .in('id', userIds);
-
   const profilesMap = new Map<string, string>();
-  if (profilesData) {
-    for (const p of profilesData) {
-      if (p.email) profilesMap.set(p.id, p.email);
+
+  if (userIds.length > 0) {
+    const { data: profilesData } = await supabase
+      .from('profiles')
+      .select('id, email')
+      .in('id', userIds);
+
+    if (profilesData) {
+      for (const p of profilesData as { id: string; email: string | null }[]) {
+        if (p.email) profilesMap.set(p.id, p.email);
+      }
     }
   }
 
