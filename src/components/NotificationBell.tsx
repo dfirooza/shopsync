@@ -123,9 +123,7 @@ export default function NotificationBell() {
           />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
+          <span className="absolute top-0.5 right-0.5 rounded-full w-3 h-3 border-2 border-white" style={{ backgroundColor: '#ef4444' }} />
         )}
       </button>
 

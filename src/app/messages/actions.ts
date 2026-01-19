@@ -27,13 +27,14 @@ export async function getOrCreateConversation(businessId: string) {
     return { conversationId: existing.id as string };
   }
 
-  // Create new conversation
+  // Create new conversation with customer email
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: newConversation, error } = await (supabase as any)
     .from("conversations")
     .insert({
       business_id: businessId,
       customer_id: user.id,
+      customer_email: user.email,
     })
     .select("id")
     .single();
@@ -180,11 +181,11 @@ export async function getBusinessInboxConversations() {
 
   const businessId = business.id as string;
 
-  // Get all conversations for this business
+  // Get all conversations for this business (including customer_email)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: conversations, error } = await (supabase as any)
     .from("conversations")
-    .select("id, customer_id, created_at")
+    .select("id, customer_id, customer_email, created_at")
     .eq("business_id", businessId)
     .order("created_at", { ascending: false });
 
@@ -192,24 +193,12 @@ export async function getBusinessInboxConversations() {
     return { error: error.message, conversations: [] };
   }
 
-  // Get customer emails for each conversation
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const customerIds = (conversations || []).map((c: any) => c.customer_id) as string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: profiles } = await (supabase as any)
-    .from("profiles")
-    .select("id, email")
-    .in("id", customerIds);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const profileMap = new Map((profiles || []).map((p: any) => [p.id, p.email]));
-
-  // Transform data
+  // Transform data - use customer_email stored in conversation
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const transformedConversations = (conversations || []).map((conv: any) => ({
     id: conv.id as string,
     customerId: conv.customer_id as string,
-    customerEmail: (profileMap.get(conv.customer_id) || "Unknown") as string,
+    customerEmail: (conv.customer_email || "Unknown") as string,
     createdAt: conv.created_at as string,
   }));
 
