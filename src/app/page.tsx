@@ -144,6 +144,9 @@ export default async function Home({ searchParams }: HomeProps) {
                 <Link href="/trending" className="text-sm font-medium text-sf-gray-2 hover:text-sf-blue-primary transition-colors">
                   Trending
                 </Link>
+                <Link href="/recommended" className="text-sm font-medium text-sf-gray-2 hover:text-sf-blue-primary transition-colors">
+                  For You
+                </Link>
                 {user && (
                   <Link href="/owner" className="text-sm font-medium text-sf-gray-2 hover:text-sf-blue-primary transition-colors">
                     Dashboard

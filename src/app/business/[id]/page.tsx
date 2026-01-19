@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 import ProductSort from "./ProductSort";
+import ProductSearch from "./ProductSearch";
 import MessageButton from "./MessageButton";
 import FollowButton from "./FollowButton";
 import AnalyticsTracker from "./AnalyticsTracker";
@@ -12,12 +13,12 @@ type Product = Tables<"products">;
 
 interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ sort?: string; q?: string }>;
 }
 
 export default async function BusinessPage({ params, searchParams }: PageProps) {
   const { id } = await params;
-  const { sort = "name" } = await searchParams;
+  const { sort = "name", q = "" } = await searchParams;
   const supabase = await createClient();
 
   // Fetch business by ID
@@ -40,11 +41,16 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
     );
   }
 
-  // Fetch products for this business with dynamic sorting
+  // Fetch products for this business with dynamic sorting and search
   let productsQuery = supabase
     .from("products")
     .select("*")
     .eq("business_id", id);
+
+  // Apply search filter
+  if (q) {
+    productsQuery = productsQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+  }
 
   // Apply sorting based on query param
   if (sort === "price-asc") {
@@ -150,9 +156,12 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Products Section */}
         <div className="bg-white rounded border border-border-light p-6">
-          <div className="flex justify-between items-center mb-5 pb-4 border-b border-border-light">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5 pb-4 border-b border-border-light">
             <h2 className="text-xl font-semibold text-sf-gray-1">Products</h2>
-            <ProductSort />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+              <ProductSearch />
+              <ProductSort />
+            </div>
           </div>
 
           {businessProducts.length > 0 ? (
@@ -169,14 +178,20 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
             <div className="text-center py-12">
               <div className="inline-flex items-center justify-center w-12 h-12 bg-sf-gray-6 rounded-full mb-3">
                 <svg className="w-6 h-6 text-sf-gray-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  {q ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  )}
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-sf-gray-1 mb-1">
-                No products yet
+                {q ? "No products found" : "No products yet"}
               </h3>
               <p className="text-sm text-sf-gray-3">
-                This business hasn't added any products yet
+                {q
+                  ? `No products match "${q}". Try a different search term.`
+                  : "This business hasn't added any products yet"}
               </p>
             </div>
           )}
