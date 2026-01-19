@@ -165,6 +165,61 @@ export type Database = {
           created_at?: string
         }
       }
+      business_followers: {
+        Row: {
+          id: string
+          business_id: string
+          follower_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          business_id: string
+          follower_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          business_id?: string
+          follower_id?: string
+          created_at?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          body: string | null
+          business_id: string | null
+          product_id: string | null
+          read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          body?: string | null
+          business_id?: string | null
+          product_id?: string | null
+          read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          body?: string | null
+          business_id?: string | null
+          product_id?: string | null
+          read?: boolean
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

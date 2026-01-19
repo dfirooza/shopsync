@@ -137,16 +137,49 @@ export async function createProduct(businessId: string, prevState: any, formData
   }
 
   // @ts-expect-error - Supabase type inference issue
-  const { error } = await supabase.from('products').insert({
+  const { data: newProductData, error } = await supabase.from('products').insert({
     business_id: businessId,
     name,
     price,
     description,
     image_url: imageUrl,
-  });
+  }).select('id').single();
+
+  const newProduct = newProductData as { id: string } | null;
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Get business name for notification
+  const { data: businessData } = await supabase
+    .from('businesses')
+    .select('name')
+    .eq('id', businessId)
+    .single();
+
+  const businessName = (businessData as { name: string } | null)?.name || 'A business you follow';
+
+  // Notify all followers about the new product
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: followers } = await (supabase as any)
+    .from('business_followers')
+    .select('follower_id')
+    .eq('business_id', businessId);
+
+  if (followers && followers.length > 0) {
+    const notifications = (followers as { follower_id: string }[]).map((f) => ({
+      user_id: f.follower_id,
+      type: 'new_product',
+      title: `${businessName} added a new product`,
+      body: name,
+      business_id: businessId,
+      product_id: newProduct?.id || null,
+    }));
+
+    // Insert notifications (fire and forget - don't block on this)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from('notifications').insert(notifications);
   }
 
   revalidatePath('/owner');

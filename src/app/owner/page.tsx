@@ -5,6 +5,7 @@ import LogoutButton from "./LogoutButton";
 import BusinessRequestForm from "./BusinessRequestForm";
 import BusinessForm from "./BusinessForm";
 import ProductsManager from "./ProductsManager";
+import NotificationBell from "@/components/NotificationBell";
 import type { Tables } from "@/types/database";
 
 export default async function OwnerDashboard() {
@@ -112,6 +113,7 @@ export default async function OwnerDashboard() {
                   Admin
                 </Link>
               )}
+              <NotificationBell />
               <Link
                 href="/"
                 className="text-sf-gray-1 hover:text-sf-blue-primary font-medium flex items-center gap-1.5 transition-colors text-sm px-3 py-1.5"

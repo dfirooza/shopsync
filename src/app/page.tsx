@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 import BusinessFilters from "./BusinessFilters";
+import NotificationBell from "@/components/NotificationBell";
 
 interface HomeProps {
   searchParams: Promise<{ q?: string; category?: string; sort?: string }>;
@@ -156,12 +157,15 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
             <div className="flex gap-3 items-center">
               {user ? (
-                <Link
-                  href="/owner"
-                  className="bg-sf-blue-primary text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-sf-blue-dark transition-colors"
-                >
-                  My Dashboard
-                </Link>
+                <>
+                  <NotificationBell />
+                  <Link
+                    href="/owner"
+                    className="bg-sf-blue-primary text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-sf-blue-dark transition-colors"
+                  >
+                    My Dashboard
+                  </Link>
+                </>
               ) : (
                 <>
                   <Link

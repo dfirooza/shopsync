@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 import ProductSort from "./ProductSort";
 import MessageButton from "./MessageButton";
+import FollowButton from "./FollowButton";
 import AnalyticsTracker from "./AnalyticsTracker";
 import ProductCard from "./ProductCard";
 
@@ -69,6 +70,19 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
   // Check if user is the business owner (hide message button for own business)
   const isOwnBusiness = user?.id === business.owner_id;
 
+  // Check if user is following this business
+  let isFollowing = false;
+  if (user) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: followData } = await (supabase as any)
+      .from("business_followers")
+      .select("id")
+      .eq("business_id", id)
+      .eq("follower_id", user.id)
+      .maybeSingle();
+    isFollowing = !!followData;
+  }
+
   return (
     <div className="min-h-screen bg-sf-gray-7">
       {/* Analytics Tracker */}
@@ -119,7 +133,14 @@ export default async function BusinessPage({ params, searchParams }: PageProps) 
               </div>
             </div>
             {!isOwnBusiness && (
-              <MessageButton businessId={business.id} isLoggedIn={isLoggedIn} />
+              <div className="flex items-center gap-2">
+                <FollowButton
+                  businessId={business.id}
+                  isLoggedIn={isLoggedIn}
+                  initialIsFollowing={isFollowing}
+                />
+                <MessageButton businessId={business.id} isLoggedIn={isLoggedIn} />
+              </div>
             )}
           </div>
         </div>
