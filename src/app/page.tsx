@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 import BusinessFilters from "./BusinessFilters";
 import NotificationBell from "@/components/NotificationBell";
+import CartIcon from "@/components/CartIcon";
 
 interface HomeProps {
   searchParams: Promise<{ q?: string; category?: string; sort?: string }>;
@@ -158,6 +159,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="flex gap-3 items-center">
               {user ? (
                 <>
+                  <CartIcon />
                   <NotificationBell />
                   <Link
                     href="/owner"

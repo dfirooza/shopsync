@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { logProductClick } from "@/lib/analytics";
+import AddToCartButton from "./AddToCartButton";
 
 interface ProductCardProps {
   product: {
@@ -12,9 +13,10 @@ interface ProductCardProps {
     image_url: string | null;
   };
   businessId: string;
+  showAddToCart?: boolean;
 }
 
-export default function ProductCard({ product, businessId }: ProductCardProps) {
+export default function ProductCard({ product, businessId, showAddToCart = true }: ProductCardProps) {
   const handleClick = () => {
     logProductClick(businessId, product.id);
   };
@@ -48,6 +50,7 @@ export default function ProductCard({ product, businessId }: ProductCardProps) {
             {product.description}
           </p>
         )}
+        {showAddToCart && <AddToCartButton productId={product.id} />}
       </div>
     </div>
   );
