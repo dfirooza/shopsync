@@ -34,7 +34,7 @@ export default function CartItemCard({ item }: CartItemCardProps) {
   return (
     <div className={`p-6 flex gap-4 ${loading ? "opacity-50" : ""}`}>
       {/* Product Image */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 relative">
         {item.productImage ? (
           <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-sf-gray-6">
             <Image
@@ -51,12 +51,24 @@ export default function CartItemCard({ item }: CartItemCardProps) {
             </svg>
           </div>
         )}
+        {item.isDiscountActive && item.discountPercent && (
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+            -{item.discountPercent}%
+          </span>
+        )}
       </div>
 
       {/* Product Info */}
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-sf-gray-1 truncate">{item.productName}</h3>
-        <p className="text-sm text-sf-gray-3 mt-0.5">${item.productPrice.toFixed(2)} each</p>
+        {item.isDiscountActive && item.discountedPrice ? (
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-sm text-red-500 font-medium">${item.discountedPrice.toFixed(2)} each</span>
+            <span className="text-xs text-sf-gray-4 line-through">${item.productPrice.toFixed(2)}</span>
+          </div>
+        ) : (
+          <p className="text-sm text-sf-gray-3 mt-0.5">${item.productPrice.toFixed(2)} each</p>
+        )}
 
         {/* Quantity Controls */}
         <div className="flex items-center gap-3 mt-3">
@@ -93,8 +105,13 @@ export default function CartItemCard({ item }: CartItemCardProps) {
       {/* Line Total */}
       <div className="flex-shrink-0 text-right">
         <p className="font-semibold text-sf-gray-1">
-          ${(item.productPrice * quantity).toFixed(2)}
+          ${((item.discountedPrice ?? item.productPrice) * quantity).toFixed(2)}
         </p>
+        {item.isDiscountActive && item.discountedPrice && (
+          <p className="text-xs text-sf-gray-4 line-through">
+            ${(item.productPrice * quantity).toFixed(2)}
+          </p>
+        )}
       </div>
     </div>
   );

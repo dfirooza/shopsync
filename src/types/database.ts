@@ -101,6 +101,9 @@ export type Database = {
           price: number
           description: string | null
           image_url: string | null
+          discount_percent: number | null
+          is_discount_active: boolean
+          discount_started_at: string | null
           created_at: string
         }
         Insert: {
@@ -110,6 +113,9 @@ export type Database = {
           price: number
           description?: string | null
           image_url?: string | null
+          discount_percent?: number | null
+          is_discount_active?: boolean
+          discount_started_at?: string | null
           created_at?: string
         }
         Update: {
@@ -119,6 +125,9 @@ export type Database = {
           price?: number
           description?: string | null
           image_url?: string | null
+          discount_percent?: number | null
+          is_discount_active?: boolean
+          discount_started_at?: string | null
           created_at?: string
         }
       }

@@ -276,6 +276,73 @@ export async function updateProduct(productId: string, prevState: any, formData:
   return { success: true };
 }
 
+// Update product discount
+export async function updateProductDiscount(
+  productId: string,
+  discountPercent: number | null,
+  isActive: boolean
+) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  // Verify ownership by checking if product belongs to user's business
+  const productResult = await supabase
+    .from('products')
+    .select('business_id')
+    .eq('id', productId)
+    .maybeSingle();
+
+  const product = productResult.data as { business_id: string } | null;
+
+  if (!product) {
+    return { error: 'Product not found' };
+  }
+
+  const businessResult = await supabase
+    .from('businesses')
+    .select('id')
+    .eq('id', product.business_id)
+    .eq('owner_id', user.id)
+    .maybeSingle();
+
+  const business = businessResult.data as { id: string } | null;
+
+  if (!business) {
+    return { error: 'Unauthorized' };
+  }
+
+  // Validate discount percent
+  if (isActive && (discountPercent === null || discountPercent < 1 || discountPercent > 99)) {
+    return { error: 'Discount percent must be between 1 and 99' };
+  }
+
+  // Update the product discount
+  const { error } = await supabase
+    .from('products')
+    // @ts-expect-error - Supabase type inference issue
+    .update({
+      discount_percent: isActive ? discountPercent : null,
+      is_discount_active: isActive,
+      discount_started_at: isActive ? new Date().toISOString() : null,
+    })
+    .eq('id', productId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath('/owner');
+  revalidatePath(`/business/${product.business_id}`);
+  return { success: true };
+}
+
 // Delete product
 export async function deleteProduct(productId: string) {
   const supabase = await createClient();
@@ -326,4 +393,65 @@ export async function deleteProduct(productId: string) {
 
   revalidatePath('/owner');
   return { success: true };
+}
+
+// Bulk import products from parsed inventory data
+export type ImportProductData = {
+  name: string;
+  price: number;
+  description: string | null;
+  imageUrl: string | null;
+};
+
+export async function bulkImportProducts(
+  businessId: string,
+  products: ImportProductData[]
+): Promise<{ success?: boolean; error?: string; importedCount?: number }> {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  // Verify business ownership
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('id')
+    .eq('id', businessId)
+    .eq('owner_id', user.id)
+    .single();
+
+  if (!business) {
+    return { error: 'Business not found or unauthorized' };
+  }
+
+  // Validate products
+  const validProducts = products.filter(p => p.name && p.price > 0);
+
+  if (validProducts.length === 0) {
+    return { error: 'No valid products to import' };
+  }
+
+  // Prepare products for insert
+  const productsToInsert = validProducts.map(p => ({
+    business_id: businessId,
+    name: p.name,
+    price: p.price,
+    description: p.description,
+    image_url: p.imageUrl,
+  }));
+
+  // @ts-expect-error - Supabase type inference issue
+  const { error } = await supabase.from('products').insert(productsToInsert);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath('/owner');
+  return { success: true, importedCount: validProducts.length };
 }

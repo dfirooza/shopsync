@@ -8,6 +8,9 @@ export type CartItem = {
   productId: string;
   productName: string;
   productPrice: number;
+  discountedPrice: number | null;
+  discountPercent: number | null;
+  isDiscountActive: boolean;
   productImage: string | null;
   quantity: number;
   businessId: string;
@@ -54,7 +57,7 @@ export async function getCartItems(): Promise<{
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: products, error: productsError } = await (supabase as any)
     .from("products")
-    .select("id, name, price, image_url, business_id")
+    .select("id, name, price, image_url, business_id, discount_percent, is_discount_active")
     .in("id", productIds);
 
   if (productsError) {
@@ -74,11 +77,33 @@ export async function getCartItems(): Promise<{
     (businesses || []).map((b: { id: string; name: string }) => [b.id, b.name])
   );
 
-  type ProductInfo = { name: string; price: number; imageUrl: string | null; businessId: string };
+  type ProductInfo = {
+    name: string;
+    price: number;
+    imageUrl: string | null;
+    businessId: string;
+    discountPercent: number | null;
+    isDiscountActive: boolean;
+  };
   const productMap = new Map<string, ProductInfo>(
-    products.map((p: { id: string; name: string; price: number; image_url: string | null; business_id: string }) => [
+    products.map((p: {
+      id: string;
+      name: string;
+      price: number;
+      image_url: string | null;
+      business_id: string;
+      discount_percent: number | null;
+      is_discount_active: boolean;
+    }) => [
       p.id,
-      { name: p.name, price: p.price, imageUrl: p.image_url, businessId: p.business_id },
+      {
+        name: p.name,
+        price: p.price,
+        imageUrl: p.image_url,
+        businessId: p.business_id,
+        discountPercent: p.discount_percent,
+        isDiscountActive: p.is_discount_active,
+      },
     ])
   );
 
@@ -86,11 +111,19 @@ export async function getCartItems(): Promise<{
     .map((item: { id: string; product_id: string; quantity: number }) => {
       const product = productMap.get(item.product_id);
       if (!product) return null;
+
+      const discountedPrice = product.isDiscountActive && product.discountPercent
+        ? product.price * (1 - product.discountPercent / 100)
+        : null;
+
       return {
         id: item.id,
         productId: item.product_id,
         productName: product.name,
         productPrice: product.price,
+        discountedPrice,
+        discountPercent: product.discountPercent,
+        isDiscountActive: product.isDiscountActive,
         productImage: product.imageUrl,
         quantity: item.quantity,
         businessId: product.businessId,
@@ -99,8 +132,9 @@ export async function getCartItems(): Promise<{
     })
     .filter((item: CartItem | null): item is CartItem => item !== null);
 
+  // Use discounted price if available
   const totalAmount = items.reduce(
-    (sum, item) => sum + item.productPrice * item.quantity,
+    (sum, item) => sum + (item.discountedPrice ?? item.productPrice) * item.quantity,
     0
   );
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -317,13 +351,13 @@ export async function checkout(
     return { error: orderError.message };
   }
 
-  // Create order items
+  // Create order items (use discounted price if available)
   const orderItems = cart.items.map((item) => ({
     order_id: order.id,
     product_id: item.productId,
     business_id: item.businessId,
     product_name: item.productName,
-    product_price: item.productPrice,
+    product_price: item.discountedPrice ?? item.productPrice,
     quantity: item.quantity,
   }));
 

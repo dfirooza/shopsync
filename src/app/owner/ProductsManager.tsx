@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { createProduct, updateProduct, deleteProduct } from "./actions";
+import { createProduct, updateProduct, deleteProduct, updateProductDiscount } from "./actions";
 import type { Tables } from "@/types/database";
+import InventoryImport from "./InventoryImport";
 
 type Product = Tables<"products">;
 
@@ -154,6 +155,10 @@ export default function ProductsManager({
 }: ProductsManagerProps) {
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [discountingProductId, setDiscountingProductId] = useState<string | null>(null);
+  const [discountPercent, setDiscountPercent] = useState<number>(10);
+  const [discountLoading, setDiscountLoading] = useState(false);
 
   const handleDelete = async (productId: string) => {
     if (!confirm("Are you sure you want to delete this product?")) {
@@ -166,17 +171,54 @@ export default function ProductsManager({
     }
   };
 
+  const handleApplyDiscount = async (productId: string) => {
+    setDiscountLoading(true);
+    const result = await updateProductDiscount(productId, discountPercent, true);
+    setDiscountLoading(false);
+
+    if (result.error) {
+      alert(`Error: ${result.error}`);
+    } else {
+      setDiscountingProductId(null);
+    }
+  };
+
+  const handleRemoveDiscount = async (productId: string) => {
+    if (!confirm("Are you sure you want to remove this discount?")) {
+      return;
+    }
+
+    setDiscountLoading(true);
+    const result = await updateProductDiscount(productId, null, false);
+    setDiscountLoading(false);
+
+    if (result.error) {
+      alert(`Error: ${result.error}`);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Products</h2>
         {!showAddForm && (
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
-          >
-            Add Product
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Import Inventory
+            </button>
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700"
+            >
+              Add Product
+            </button>
+          </div>
         )}
       </div>
 
@@ -205,45 +247,140 @@ export default function ProductsManager({
                 <div className="border rounded-lg p-4">
                   <div className="flex gap-4">
                     {product.image_url && (
-                      <div className="flex-shrink-0">
+                      <div className="flex-shrink-0 relative">
                         <img
                           src={product.image_url}
                           alt={product.name}
                           className="w-24 h-24 object-cover rounded-lg"
                         />
+                        {product.is_discount_active && product.discount_percent && (
+                          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                            -{product.discount_percent}%
+                          </span>
+                        )}
                       </div>
                     )}
                     <div className="flex-1 flex justify-between items-start">
                       <div>
-                        <h3 className="text-lg font-semibold">{product.name}</h3>
-                        <p className="text-xl text-green-600 font-bold mt-1">
-                          ${product.price.toFixed(2)}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-semibold">{product.name}</h3>
+                          {product.is_discount_active && product.discount_percent && !product.image_url && (
+                            <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                              -{product.discount_percent}%
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1">
+                          {product.is_discount_active && product.discount_percent ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xl text-green-600 font-bold">
+                                ${(product.price * (1 - product.discount_percent / 100)).toFixed(2)}
+                              </span>
+                              <span className="text-sm text-gray-400 line-through">
+                                ${product.price.toFixed(2)}
+                              </span>
+                            </div>
+                          ) : (
+                            <p className="text-xl text-green-600 font-bold">
+                              ${product.price.toFixed(2)}
+                            </p>
+                          )}
+                        </div>
                         {product.description && (
                           <p className="text-gray-600 mt-2">{product.description}</p>
                         )}
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setEditingProductId(product.id)}
-                          className="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700 text-sm"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(product.id)}
-                          className="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 text-sm"
-                        >
-                          Delete
-                        </button>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setEditingProductId(product.id)}
+                            className="bg-blue-600 text-white py-1 px-3 rounded hover:bg-blue-700 text-sm"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product.id)}
+                            className="bg-red-600 text-white py-1 px-3 rounded hover:bg-red-700 text-sm"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                        {product.is_discount_active ? (
+                          <button
+                            onClick={() => handleRemoveDiscount(product.id)}
+                            disabled={discountLoading}
+                            className="bg-orange-500 text-white py-1 px-3 rounded hover:bg-orange-600 text-sm disabled:opacity-50"
+                          >
+                            {discountLoading ? "..." : "Remove Discount"}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setDiscountingProductId(product.id);
+                              setDiscountPercent(10);
+                            }}
+                            className="bg-purple-600 text-white py-1 px-3 rounded hover:bg-purple-700 text-sm"
+                          >
+                            Add Discount
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
+
+                  {/* Discount Form */}
+                  {discountingProductId === product.id && (
+                    <div className="mt-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <h4 className="font-medium text-purple-900 mb-3">Set In-App Discount</h4>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="1"
+                            max="99"
+                            value={discountPercent}
+                            onChange={(e) => setDiscountPercent(Math.min(99, Math.max(1, parseInt(e.target.value) || 1)))}
+                            className="w-20 px-3 py-2 border rounded-lg text-center text-gray-900"
+                          />
+                          <span className="text-purple-900">% off</span>
+                        </div>
+                        <div className="text-sm text-purple-700">
+                          New price: <strong>${(product.price * (1 - discountPercent / 100)).toFixed(2)}</strong>
+                        </div>
+                      </div>
+                      <p className="text-xs text-purple-600 mt-2">
+                        Followers will be notified when you activate this discount
+                      </p>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => handleApplyDiscount(product.id)}
+                          disabled={discountLoading}
+                          className="bg-purple-600 text-white py-1.5 px-4 rounded hover:bg-purple-700 text-sm font-medium disabled:opacity-50"
+                        >
+                          {discountLoading ? "Applying..." : "Apply Discount"}
+                        </button>
+                        <button
+                          onClick={() => setDiscountingProductId(null)}
+                          className="bg-gray-200 text-gray-700 py-1.5 px-4 rounded hover:bg-gray-300 text-sm"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           ))}
         </div>
+      )}
+
+      {/* Import Inventory Modal */}
+      {showImportModal && (
+        <InventoryImport
+          businessId={businessId}
+          onClose={() => setShowImportModal(false)}
+        />
       )}
     </div>
   );

@@ -28,7 +28,9 @@ export default async function CartPage() {
       };
     }
     acc[item.businessId].items.push(item);
-    acc[item.businessId].subtotal += item.productPrice * item.quantity;
+    // Use discounted price if available
+    const effectivePrice = item.discountedPrice ?? item.productPrice;
+    acc[item.businessId].subtotal += effectivePrice * item.quantity;
     return acc;
   }, {} as Record<string, { businessName: string; items: typeof cart.items; subtotal: number }>);
 
